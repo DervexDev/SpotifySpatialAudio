@@ -7,11 +7,23 @@
 import Foundation
 
 struct AppleScript {
-	static func initSafari() {
+	static func openSafari() {
 		let script = """
 		tell application "Safari"
-			make new document with properties {URL:"https://open.spotify.com/"}
-			delay \(SAFARI_HIDE_DELAY)
+			open location "https://open.spotify.com/"
+			activate
+		end tell
+		"""
+		
+		var error: NSDictionary?
+		if let scriptObject = NSAppleScript(source: script) {
+			scriptObject.executeAndReturnError(&error)
+		}
+	}
+	
+	static func hideSafari() {
+		let script = """
+		tell application "Safari"
 			set miniaturized of window 1 to true
 		end tell
 		"""
@@ -22,16 +34,20 @@ struct AppleScript {
 		}
 	}
 	
-	static func clearSafari() {
+	static func fakeSpace() {
 		let script = """
-		tell application "Safari"
-			close (every window whose name contains "Spotify")
+		tell application "System Events"
+			key code 49
 		end tell
 		"""
 		
 		var error: NSDictionary?
 		if let scriptObject = NSAppleScript(source: script) {
 			scriptObject.executeAndReturnError(&error)
+		}
+		
+		if error != nil {
+			print("ERROR: missing privileges!")
 		}
 	}
 }

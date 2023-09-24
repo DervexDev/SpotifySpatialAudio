@@ -26,11 +26,16 @@ struct Events {
 		NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "kMRMediaRemoteNowPlayingInfoDidChangeNotification"), object: nil, queue: nil) { _ in
 			nowPlayingInfo(DispatchQueue.main, { information in
 				let isPlaying = type(of: information["kMRMediaRemoteNowPlayingInfoPlaybackRate"] ?? 0) != Int.self
+				let album = information["kMRMediaRemoteNowPlayingInfoAlbum"] ?? ""
 				
-				if isPlaying != lastValue && isPlaying {
+				if isPlaying && isPlaying != lastValue {
 					let now = NSDate().timeIntervalSince1970.rounded()
 					
 					if now - lastUsed == 1 {
+						return
+					}
+					
+					if album as! String == "" {
 						return
 					}
 					

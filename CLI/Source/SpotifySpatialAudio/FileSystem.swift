@@ -6,15 +6,13 @@
 
 import Foundation
 
-let FILE_NAME: String = ".ssa.json"
-
 struct FileSystem {
 	static func loadJSON() throws -> Any? {
 		let fileManager = FileManager.default
 		let urls = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
 		
 		if let url = urls.first {
-			let file = url.appendingPathComponent(FILE_NAME)
+			let file = url.appendingPathComponent(DATA_FILE_NAME)
 			
 			if !fileManager.fileExists(atPath: file.path()) {
 				return nil
@@ -35,7 +33,7 @@ struct FileSystem {
 		let urls = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
 		
 		if let url = urls.first {
-			let file = url.appendingPathComponent(FILE_NAME)
+			let file = url.appendingPathComponent(DATA_FILE_NAME)
 			let data = try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted])
 			try data.write(to: file, options: [.atomicWrite])
 			

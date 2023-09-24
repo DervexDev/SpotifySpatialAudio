@@ -38,17 +38,32 @@ struct App {
 				}
 				
 				var id = Requests.getSafariId(accessToken: data.accessToken)
+				var attempts = 0
 				
-				if id == "null" {
-					AppleScript.clearSafari()
-					AppleScript.initSafari()
-				} else if id == "active" {
+				if id == "none" {
+					AppleScript.openSafari()
+				} else if id == "active" || id == "inactive" {
 					return
 				}
 				
-				id = Requests.getSafariId(accessToken: data.accessToken)
+				while id == "none" && attempts < OPEN_SAFARI_MAX_ATTEMPTS {
+					sleep(1)
+					id = Requests.getSafariId(accessToken: data.accessToken)
+					attempts += 1
+				}
+				
+				if id == "none" {
+					print("ERROR: Safari cannot be opened!")
+					return
+				}
 				
 				Requests.changeOutput(accessToken: data.accessToken, id: id)
+				
+				sleep(1)
+				AppleScript.fakeSpace()
+				//Requests.resumePlayback(accessToken: data.accessToken)
+				sleep(1)
+				AppleScript.hideSafari()
 			}
 		}
 		

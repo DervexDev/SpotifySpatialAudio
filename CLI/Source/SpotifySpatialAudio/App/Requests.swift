@@ -15,7 +15,7 @@ struct Requests {
 		]
 		
 		let id = UnsafeMutablePointer<String>.allocate(capacity: 1)
-		id.pointee = "null"
+		id.pointee = "none"
 		
 		let group = DispatchGroup()
 		group.enter()
@@ -28,17 +28,29 @@ struct Requests {
 			
 			do {
 				let decoded = try JSONSerialization.jsonObject(with: data) as! [String: Array<[String: Any]>]
+				var isActive = false
 				
 				for device in decoded["devices"]! {
-					if device["name"] as! String == "Web Player (Safari)" {
-						if device["is_active"] as! Bool {
-							id.pointee = "active"
-						} else {
-							id.pointee = device["id"] as! String
-						}
+					if device["name"] as! String == Host.current().localizedName! && device["is_active"] as! Bool {
+						isActive = true
+						break
 					}
 				}
 				
+				if isActive {
+					for device in decoded["devices"]! {
+						if device["name"] as! String == "Web Player (Safari)" {
+							if device["is_active"] as! Bool {
+								id.pointee = "active"
+							} else {
+								id.pointee = device["id"] as! String
+							}
+							break
+						}
+					}
+				} else {
+					id.pointee = "inactive"
+				}
 			} catch {
 				group.leave()
 				return
@@ -108,6 +120,17 @@ struct Requests {
 			"Content-Type": "application/json"
 		]
 		request.httpBody = body as Data
+		
+		URLSession.shared.dataTask(with: request).resume()
+	}
+	
+	static func resumePlayback(accessToken: String) {
+		var request = URLRequest(url: URL(string: "https://api.spotify.com/v1/me/player/play")!)
+		request.httpMethod = "PUT"
+		request.allHTTPHeaderFields = [
+			"Authorization": "Bearer " + accessToken,
+			"Content-Type": "application/json"
+		]
 		
 		URLSession.shared.dataTask(with: request).resume()
 	}
